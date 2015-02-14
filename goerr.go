@@ -6,7 +6,7 @@ import (
 )
 
 var (
-	FormatString = "%s\n\n%s"
+	FormatString = "%v\n\n%s"
 )
 
 //按格式返回一个错误
