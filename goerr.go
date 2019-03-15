@@ -7,18 +7,23 @@ import (
 	"strconv"
 )
 
-// return new error
+// new errorContext with error and string
 //
 // return error
-func NewError(err error, format string, p ...interface{}) error {
+func Errorf(err error, format string, p ...interface{}) error {
 	return &errorContext{text: fmt.Sprintf(format, p...), err: err, code: -1}
 }
 
-// return new error
+// new errorContext with error
 //
 //  return  error
-func New(err error) *errorContext {
+func Error(err error) *errorContext {
 	return &errorContext{err: err, code: -1}
+}
+
+// new errorContext with string
+func String(format string, p ...interface{}) *errorContext {
+	return &errorContext{text: fmt.Sprintf(format, p...), code: -1}
 }
 
 //new error
