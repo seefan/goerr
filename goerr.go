@@ -11,19 +11,19 @@ import (
 //
 // return error
 func Errorf(err error, format string, p ...interface{}) error {
-	return &errorContext{text: fmt.Sprintf(format, p...), err: err, code: -1}
+	return &errorContext{text: fmt.Sprintf(format, p...), err: err, line: -1}
 }
 
 // new errorContext with error
 //
 //  return  error
 func Error(err error) *errorContext {
-	return &errorContext{err: err, code: -1}
+	return &errorContext{err: err, line: -1}
 }
 
 // new errorContext with string
 func String(format string, p ...interface{}) *errorContext {
-	return &errorContext{text: fmt.Sprintf(format, p...), code: -1}
+	return &errorContext{text: fmt.Sprintf(format, p...), line: -1}
 }
 
 //new error
@@ -52,34 +52,45 @@ func (e *errorContext) File(file string) *errorContext {
 	return e
 }
 
-//实现error接口
-func (e *errorContext) Error() string {
+// trace error message
+func (e *errorContext) Trace() string {
 	var buffer bytes.Buffer
 	if e.file != "" {
 		buffer.WriteString("File: ")
 		buffer.WriteString(e.file)
-		buffer.WriteString("\t")
+		buffer.WriteRune('\t')
 	}
 	if e.line != -1 {
 		bs := strconv.AppendInt(nil, int64(e.line), 10)
 		buffer.WriteString("Line: ")
 		buffer.Write(bs)
-		buffer.WriteString("\t")
+		buffer.WriteRune('\t')
 	}
 	if e.code != 0 {
 		bs := strconv.AppendInt(nil, int64(e.code), 10)
 		buffer.WriteString("Error Code: ")
 		buffer.Write(bs)
-		buffer.WriteString("\t")
+		buffer.WriteRune('\t')
 	}
 	if e.text != "" {
 		buffer.WriteString("Text: ")
 		buffer.WriteString(e.text)
-		buffer.WriteString("\t")
+		buffer.WriteRune('\t')
 	}
 	if e.err != nil {
 		buffer.WriteString("\nTrace: ")
-		buffer.WriteString(e.err.Error())
+		buffer.WriteRune('\t')
 	}
 	return buffer.String()
+}
+
+//实现error接口
+func (e *errorContext) Error() string {
+	if e.text != "" {
+		return e.text
+	} else if e.err != nil {
+		return e.err.Error()
+	} else {
+		return e.Trace()
+	}
 }
