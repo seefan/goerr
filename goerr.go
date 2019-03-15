@@ -18,7 +18,11 @@ func Errorf(err error, format string, p ...interface{}) error {
 //
 //  return  error
 func Error(err error) *errorContext {
-	return &errorContext{err: err, line: -1}
+	if e, ok := err.(*errorContext); ok {
+		return e
+	} else {
+		return &errorContext{err: err, line: -1}
+	}
 }
 
 // new errorContext with string
