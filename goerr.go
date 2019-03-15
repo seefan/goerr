@@ -77,7 +77,9 @@ func (e *errorContext) Error() string {
 		buffer.WriteString(e.text)
 		buffer.WriteString("\t")
 	}
-	buffer.WriteString("\nTrace: ")
-	buffer.WriteString(e.err.Error())
+	if e.err != nil {
+		buffer.WriteString("\nTrace: ")
+		buffer.WriteString(e.err.Error())
+	}
 	return buffer.String()
 }
