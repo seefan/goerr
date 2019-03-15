@@ -2,43 +2,77 @@
 package goerr
 
 import (
+	"bytes"
 	"fmt"
+	"strconv"
 )
 
-var (
-	FormatString = "%v\nthe trace error is\n%s"
-)
-
-//按格式返回一个错误，同时携带原始的错误信息
+// return new error
 //
-//  返回 error
+// return error
 func NewError(err error, format string, p ...interface{}) error {
-	return fmt.Errorf(FormatString, fmt.Sprintf(format, p...), err)
+	return &errorContext{text: fmt.Sprintf(format, p...), err: err, code: -1}
 }
 
-//返回一个错误
+// return new error
 //
-//  返回 error
-func New(format string, p ...interface{}) error {
-	return fmt.Errorf(format, p...)
+//  return  error
+func New(err error) *errorContext {
+	return &errorContext{err: err, code: -1}
 }
 
-//按格式返回一个错误，同时携带错误代码和原始的错误信息
-//
-//  返回 error
-func NewCodeError(code int, format string, p ...interface{}) error {
-	txt := fmt.Sprintf(FormatString, fmt.Sprintf(format, p...))
-	newerr := Error{code, txt}
-	return error(newerr)
+//new error
+type errorContext struct {
+	code int
+	text string
+	file string
+	line int
+	err  error
 }
 
-//新的error类型
-type Error struct {
-	Code int
-	Text string
+func (e *errorContext) Format(format string, p ...interface{}) *errorContext {
+	e.text = fmt.Sprintf(format, p...)
+	return e
+}
+func (e *errorContext) Code(code int) *errorContext {
+	e.code = code
+	return e
+}
+func (e *errorContext) Line(line int) *errorContext {
+	e.line = line
+	return e
+}
+func (e *errorContext) File(file string) *errorContext {
+	e.file = file
+	return e
 }
 
 //实现error接口
-func (this Error) Error() string {
-	return fmt.Sprintf("Code is %d, Error Text is %s", this.Code, this.Text)
+func (e *errorContext) Error() string {
+	var buffer bytes.Buffer
+	if e.file != "" {
+		buffer.WriteString("File: ")
+		buffer.WriteString(e.file)
+		buffer.WriteString("\t")
+	}
+	if e.line != -1 {
+		bs := strconv.AppendInt(nil, int64(e.line), 10)
+		buffer.WriteString("Line: ")
+		buffer.Write(bs)
+		buffer.WriteString("\t")
+	}
+	if e.code != 0 {
+		bs := strconv.AppendInt(nil, int64(e.code), 10)
+		buffer.WriteString("Error Code: ")
+		buffer.Write(bs)
+		buffer.WriteString("\t")
+	}
+	if e.text != "" {
+		buffer.WriteString("Text: ")
+		buffer.WriteString(e.text)
+		buffer.WriteString("\t")
+	}
+	buffer.WriteString("\nTrace: ")
+	buffer.WriteString(e.err.Error())
+	return buffer.String()
 }
