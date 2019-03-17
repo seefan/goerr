@@ -59,6 +59,13 @@ func (e *errorContext) E(err error) *errorContext {
 	e.err = err
 	return e
 }
+func (e *errorContext) AttachE(err error) {
+	if er, ok := e.err.(*errorContext); er != nil && ok {
+		er.AttachE(err)
+	} else {
+		e.err = err
+	}
+}
 
 // trace error message
 func (e *errorContext) Trace() string {
