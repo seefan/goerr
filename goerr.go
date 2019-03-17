@@ -55,6 +55,10 @@ func (e *errorContext) File(file string) *errorContext {
 	e.file = file
 	return e
 }
+func (e *errorContext) E(err error) *errorContext {
+	e.err = err
+	return e
+}
 
 // trace error message
 func (e *errorContext) Trace() string {
@@ -81,9 +85,15 @@ func (e *errorContext) Trace() string {
 		buffer.WriteString(e.text)
 		buffer.WriteRune('\t')
 	}
+	buffer.WriteRune('\n')
 	if e.err != nil {
-		buffer.WriteString("\nTrace: ")
-		buffer.WriteRune('\t')
+		if err, ok := e.err.(*errorContext); ok {
+			buffer.WriteString(err.Trace())
+		} else {
+			buffer.WriteString("Trace:")
+			buffer.WriteString(e.err.Error())
+			buffer.WriteRune('\n')
+		}
 	}
 	return buffer.String()
 }
