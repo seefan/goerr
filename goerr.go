@@ -7,30 +7,39 @@ import (
 	"strconv"
 )
 
-// new errorContext with error and string
+//Errorf new errorContext with error and string
 //
 // return error
 func Errorf(err error, format string, p ...interface{}) error {
 	return &errorContext{text: fmt.Sprintf(format, p...), err: err, line: -1}
 }
 
-// new errorContext with error
+//Error new errorContext with error
 //
-//  return  error
+//  return  errorContext
 func Error(err error) *errorContext {
 	if e, ok := err.(*errorContext); ok {
 		return e
-	} else {
-		return &errorContext{err: err, line: -1}
 	}
+	return &errorContext{err: err, line: -1}
 }
 
-// new errorContext with string
+//Trace get trace with error
+//
+//  return  string
+func Trace(err error) string {
+	if e, ok := err.(*errorContext); ok {
+		return e.Trace()
+	}
+	return ""
+}
+
+//String new errorContext with string
 func String(format string, p ...interface{}) *errorContext {
 	return &errorContext{text: fmt.Sprintf(format, p...), line: -1}
 }
 
-//new error
+//errorContext new error
 type errorContext struct {
 	code int
 	text string
